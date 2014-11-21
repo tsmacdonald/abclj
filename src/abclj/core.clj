@@ -1,6 +1,7 @@
-(ns abclj.core)
+(ns abclj.core
+  (:require [clojure.java.io :as io]
+            [instaparse.core :as insta]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+(def raw-grammar (.getPath (io/resource "abc.ebnf")))
+
+(def parser (insta/parser raw-grammar))
