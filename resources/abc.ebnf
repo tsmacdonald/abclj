@@ -10,7 +10,7 @@ Key-Accidental	::= '#' | 'b'
 Mode		::= 'm' | 'mix' | 'Mix' | 'dor' | 'Dor' | 'phr' | 'Phr' | 'lyd' | 'Lyd' | 'loc' | 'Loc'
 Generic-Header	::= #'[A-JL-UWYZ]:' <[Whitespace]> Header-Text <EOL>
 Voice-Header	::= 'V:' <[Whitespace]> Natural-Number <EOL>
-Header-Text	::= '.*'
+Header-Text	::= #'.*'
 
 Voice		::=  {Note* Note-Separator}
 Note-Separator	::= [Whitespace] Barline [Whitespace] | Whitespace
