@@ -45,7 +45,7 @@
       [[:Barline "|"]] :barline
       [[:Barline "||"]] :barline
       [[:Barline "|]"]] :double-barline
-      :else (parsing-error "note separation" hiccup)))
+      :else (parsing-error "note separation" (first hiccup))))
 
 (defn voice-part->edn
   [hiccup]
@@ -71,9 +71,9 @@
 
 (defn hiccup->edn
   [hiccup]
-  (match hiccup
-      [:Tunebook & _] (map hiccup->edn (rest hiccup))
-      [:Tune & _] (tune->edn (rest hiccup))
+  (match [hiccup]
+      [[:Tunebook & _]] (map hiccup->edn (rest hiccup))
+      [[:Tune & _]] (tune->edn (rest hiccup))
       :else (parsing-error "toplevel" (first hiccup))))
 
 (defn- result-or-empty

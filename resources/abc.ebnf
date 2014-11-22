@@ -13,7 +13,7 @@ Voice-Header	::= 'V:' <[Whitespace]> Natural-Number <EOL>
 Header-Text	::= #'.*'
 
 Voice		::=  {Note* Note-Separator}
-Note-Separator	::= [Whitespace] Barline [Whitespace] | Whitespace
+Note-Separator	::= <[Whitespace]> Barline <[Whitespace]> / Whitespace
 
 Note		::= [Note-Prefix] Pitch [Note-Suffix]
 Note-Prefix	::= {Decoration}
