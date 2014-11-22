@@ -28,23 +28,33 @@
 (defn- header->edn
   [hiccup]
   (match hiccup
-         [:X-Header "X:" n] [:number (Long/parseLong n)]
-         [:Key-Header "K:" k] [:key (parse-key k)]
-         [:Generic-Header k v] (parse-header k v)
-         :else (parsing-error "headers" (first hiccup))))
+      [:X-Header "X:" n] [:number (Long/parseLong n)]
+      [:Key-Header "K:" k] [:key (parse-key k)]
+      [:Generic-Header k v] (parse-header k v)
+      :else (parsing-error "headers" (first hiccup))))
 
+(defn- note->edn
+  [hiccup]
+  ;TODO ...
+  (-> hiccup first second))
+
+(defn voice-part->edn
+  [hiccup]
+  (match [hiccup]
+      [[:Note & note-body]] (note->edn note-body)
+      [[:Note-Separator & _]] :note-separator
+      :else (parsing-error "voices" (first hiccup))))
 (defn- voice->edn
   [hiccup]
-  ;;TODO
-  ":)")
+  (map voice-part->edn hiccup))
 
 (defn- tune-part->edn
   [tune-so-far hiccup]
-  (match hiccup
-         [:Headers & _] (assoc tune-so-far :headers (into {} (map header->edn (rest hiccup))))
-         [:Voice & _] (assoc tune-so-far :voices (conj (or (:voices tune-so-far) [])
-                                                       (map voice->edn (rest hiccup))))
-         :else (parsing-error "tune" (first hiccup))))
+  (match [hiccup]
+      [[:Headers & _]] (assoc tune-so-far :headers (into {} (map header->edn (rest hiccup))))
+      [[:Voice & _]] (assoc tune-so-far :voices (conj (or (:voices tune-so-far) [])
+                                                       (voice->edn (rest hiccup))))
+      :else (parsing-error "tune" (first hiccup))))
 
 (defn- tune->edn
   [hiccup]
@@ -53,9 +63,9 @@
 (defn hiccup->edn
   [hiccup]
   (match hiccup
-         [:Tunebook & _] (map hiccup->edn (rest hiccup))
-         [:Tune & _] (tune->edn (rest hiccup))
-    :else (parsing-error "toplevel" (first hiccup))))
+      [:Tunebook & _] (map hiccup->edn (rest hiccup))
+      [:Tune & _] (tune->edn (rest hiccup))
+      :else (parsing-error "toplevel" (first hiccup))))
 
 (defn- result-or-empty
   [parsed-object]
