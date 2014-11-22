@@ -38,11 +38,20 @@
   ;TODO ...
   (-> hiccup first second))
 
+(defn- note-separator->edn
+  [hiccup]
+  (match hiccup
+      [[:Whitespace & _]] :note-separator
+      [[:Barline "|"]] :barline
+      [[:Barline "||"]] :barline
+      [[:Barline "|]"]] :double-barline
+      :else (parsing-error "note separation" hiccup)))
+
 (defn voice-part->edn
   [hiccup]
   (match [hiccup]
       [[:Note & note-body]] (note->edn note-body)
-      [[:Note-Separator & _]] :note-separator
+      [[:Note-Separator & separator]] (note-separator->edn separator)
       :else (parsing-error "voices" (first hiccup))))
 (defn- voice->edn
   [hiccup]
