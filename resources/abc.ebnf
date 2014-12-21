@@ -1,32 +1,39 @@
-Tunebook	::= Tune*
+Tunebook	  ::= Tune*
 
-Tune		::= Headers [Voice] {Voice-Header Voice}
+Tune		  ::= Headers [Voice] {Voice-Header Voice}
 
-Headers		::= X-Header {Generic-Header} Key-Header [Voice-Header]
-X-Header	::= 'X:' <[Whitespace]> Natural-Number <EOL>
-Key-Header	::= 'K:' <[Whitespace]> Key <EOL>
-Key		::= #'[A-G]'[Key-Accidental] <[Whitespace]> [Mode]
-Key-Accidental	::= '#' | 'b'
-Mode		::= 'm' | 'mix' | 'Mix' | 'dor' | 'Dor' | 'phr' | 'Phr' | 'lyd' | 'Lyd' | 'loc' | 'Loc'
-Generic-Header	::= #'[A-JL-UWYZ]:' <[Whitespace]> Header-Text <EOL>
-Voice-Header	::= 'V:' <[Whitespace]> Natural-Number <EOL>
-Header-Text	::= #'.*'
+Headers		  ::= X-Header {Generic-Header} Key-Header [Voice-Header]
+X-Header	  ::= <'X:'> <[Whitespace]> Natural-Number <EOL>
+Key-Header	  ::= <'K:'> <[Whitespace]> Key <EOL>
+Key		  ::= #'[A-G]'[Key-Accidental] <[Whitespace]> [Mode]
+Key-Accidental	  ::= '#' | 'b'
+Mode		  ::= 'm' | 'mix' | 'Mix' | 'dor' | 'Dor' | 'phr' | 'Phr' | 'lyd' | 'Lyd' | 'loc' | 'Loc'
+Generic-Header	  ::= #'[A-JL-UWYZ]:' <[Whitespace]> Header-Text <EOL>
+Voice-Header	  ::= 'V:' <[Whitespace]> Natural-Number <EOL>
+<Header-Text>	  ::= #'.*'
 
-Voice		::=  {Note* Note-Separator}
-Note-Separator	::= <[Whitespace]> Barline <[Whitespace]> / Whitespace
+Voice		  ::=  {Note* Note-Separator}
+Note-Separator	  ::= <[Whitespace]> Barline <[Whitespace]> / Beam-Break
 
-Note		::= [Note-Prefix] Pitch [Note-Suffix]
-Note-Prefix	::= {Decoration}
-Pitch		::= #'[a-gA-G]'
-Note-Suffix	::= [Octave-Modifier] Duration
-Decoration	::= Trill | #'!\w+!' | #'\+\w+\+'
-<Trill>		::= 'T' | '!trill!' | '+trill+'
-Duration	::= Counting-Number ['/' Counting-Number]
-Octave-Modifier	::= Octave-Down+ | Octave-Up+
-Octave-Down	::= ','
-Octave-Up	::= "'"
+Note		  ::= {Note-Prefix} Pitch [Note-Suffix]
+<Note-Prefix>	  ::= Decoration | Accidental
+<Accidental>	  ::= Flat | Natural | Sharp | Double-Flat | Double-Sharp
+Flat		  ::= <'_'>
+Natural		  ::= <'='>
+Sharp		  ::= <'^'>
+Double-Flat	  ::= <'__'>
+Double-Sharp	  ::= <'^^'>
+Pitch		  ::= #'[a-gA-G]'
+<Note-Suffix>     ::= {Octave-Modifier} [Duration]
+Decoration	  ::= Trill | #'!\w+!' | #'\+\w+\+'
+<Trill>		  ::= 'T' | '!trill!' | '+trill+'
+Duration	  ::= Counting-Number ['/' Counting-Number]
+<Octave-Modifier> ::= Octave-Down+ | Octave-Up+
+Octave-Down	  ::= ','
+Octave-Up	  ::= "'"
 
-Barline		::= '|' | '||' | '|]'
+Barline		  ::= '|' | '||' | '|]'
+Beam-Break	  ::= <Whitespace>
 
 <Counting-Number> ::= #'[1-9][0-9]*'
 <Natural-Number>  ::= #'[0-9]+'
