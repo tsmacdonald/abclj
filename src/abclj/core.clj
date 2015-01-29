@@ -5,14 +5,6 @@
             [instaparse.core :as insta]
             [clojure.edn :as edn]))
 
-(comment test
-  (clojure.pprint/pprint
-   (insta/transform transformation-map
-                    (insta/parse abc->hiccup
-                                 (slurp "tmp/sample.abc"))))
-)
-
-
 (def raw-grammar (.getPath (io/resource "abc.ebnf")))
 
 (def abc->hiccup
@@ -25,7 +17,8 @@
    ;;Headers
    :Headers (fn [& headers] [:Headers (into {} headers)])
    :X-Header (fn [number] [:X (edn/read-string number)])
-   :Key-Header (fn [key] [:K key])
+   :Length-Header parse/length-header
+   :Key-Header parse/key-header
    :Key (fn [raw-key] raw-key)
  ;  :Key-Accidental identity
   ; :Mode identity
@@ -38,22 +31,11 @@
 
    ;;Notes
    :Note parse/note
-;   :Note-Prefix identity
-;   :Pitch identity
-;   :Note-Suffix identity
-;   :Decoration identity
-;   :Duration identity
-;   :Octave-Modifier identity
-;   :Octave-Down identity
-;   :Octave-Up identity
 
    ;;Note Separation
-;   :Barline identity
-;   :Beam-Break identity
-
-   ;;Miscellaneous
-;   :Whitespace identity
-;   :EOL identity
+   :Note-Separator parse/note-separator
+   :Barline parse/barline
+   :Beam-Break parse/beam-break
    })
 
 (defn- result-or-empty
@@ -64,11 +46,9 @@
 
 (defn parse
   [abc]
-  (letfn []
-    (-> abc
-        abc->hiccup
-        result-or-empty
-        hiccup->edn)))
+  (->> abc
+       (insta/parse abc->hiccup)
+       (insta/transform transformation-map)))
 
 (defn parse-file
   [filename]

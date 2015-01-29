@@ -17,17 +17,17 @@
   (mod pitch octave))
 
 (defn flat?
-  [{:keys [pitch pitch-name]}]
+  [[_ {:keys [pitch pitch-name]}]]
   (= (get (map-vals (comp relativize dec) name->pitch) pitch-name)
      (relativize pitch)))
 
 (defn natural?
-  [{:keys [pitch pitch-name]}]
+  [[_ {:keys [pitch pitch-name]}]]
   (= (get name->pitch pitch-name)
      (relativize pitch)))
 
 (defn sharp?
-  [{:keys [pitch pitch-name]}]
+  [[_ {:keys [pitch pitch-name]}]]
   (= (get (map-vals (comp relativize inc) name->pitch) pitch-name)
      (relativize pitch)))
 
@@ -35,19 +35,19 @@
   [note]
   (cond
     (flat?    note) note
-    (natural? note) (update-in note [:pitch] dec)
-    (sharp?   note) (update-in note [:pitch] (comp dec dec))))
+    (natural? note) (update-in note [1 :pitch] dec)
+    (sharp?   note) (update-in note [1 :pitch] (comp dec dec))))
 
 (defn naturalize
   [note]
   (cond
-    (flat?    note) (update-in note [:pitch] inc)
+    (flat?    note) (update-in note [1 :pitch] inc)
     (natural? note) note
-    (sharp?   note) (update-in note [:pitch] dec)))
+    (sharp?   note) (update-in note [1 :pitch] dec)))
 
 (defn sharpen
   [note]
   (cond
-    (flat?    note) (update-in note [:pitch] (comp inc inc))
-    (natural? note) (update-in note [:pitch] inc)
+    (flat?    note) (update-in note [1 :pitch] (comp inc inc))
+    (natural? note) (update-in note [1 :pitch] inc)
     (sharp?   note) note))
