@@ -1,6 +1,5 @@
 (ns abclj.core
-  (:require [abclj.parsing :refer [hiccup->edn]]
-            [abclj.parse :as parse]
+  (:require [abclj.parse :as parse]
             [clojure.java.io :as io]
             [instaparse.core :as insta]
             [clojure.edn :as edn]))
