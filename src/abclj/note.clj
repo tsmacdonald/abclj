@@ -31,6 +31,13 @@
   (= (get (map-vals (comp relativize inc) name->pitch) pitch-name)
      (relativize pitch)))
 
+(defn pitch-adjustment
+  [note]
+  (condp (fn [f n] (f n)) note
+    flat? -1
+    natural? 0
+    sharp? 1))
+
 (defn flatten
   [note]
   (cond

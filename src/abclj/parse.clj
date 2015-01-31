@@ -3,8 +3,8 @@
             [abclj.note :as note]))
 
 
-(def current-key (atom {:key nil
-                        :accidentals nil}))
+(def current-key (atom {:key {}
+                        :accidentals {}}))
 
 (def default-duration (atom 1/8))
 
@@ -14,7 +14,7 @@
 
 (defn- parse-pitch
   [raw-pitch]
-  (let [name (pitch-name raw-pitch)]  
+  (let [name (pitch-name raw-pitch)]
     (+ (or (get-in @current-key [:accidentals name])
            (get-in @current-key [:key         name]))
        (get {"C" 0
@@ -33,7 +33,7 @@
              "b" 23}
             raw-pitch))))
 
-(defn- accidentals-for ;;FIXME
+(defn accidentals-for ;;FIXME
   [key]
   (let [sharp-count (.indexOf ["C" "D" "E" "F" "G" "A" "B"] key)]
     (merge {"A" 0
@@ -71,22 +71,23 @@
                        (drop-while (comp (partial not= :Pitch) first))
                        first
                        second)]
-    (reduce (fn [note-so-far arg]
-              (match arg
-                [:Pitch       _]      note-so-far ;; already taken care of by the seed
-                [:Octave-Down _]      (update-in note-so-far [1 :pitch] #(- % note/octave))
-                [:Octave-Up   _]      (update-in note-so-far [1 :pitch] #(+ % note/octave))
-                [:Flat]               (do (swap! current-key assoc-in [:accidentals (:pitch-name note-so-far)] -1)
-                                          (note/flatten note-so-far))
-                [:Natural]            (do (swap! current-key assoc-in [:accidentals (:pitch-name note-so-far)] 0)
-                                          (note/naturalize note-so-far))
-                [:Sharp]              (do (swap! current-key assoc-in [:accidentals (:pitch-name note-so-far)] 1)
-                                          (note/sharpen note-so-far))
-                [:Duration length]    (assoc-in note-so-far [1 :duration] (* @default-duration (Long/parseLong length)))))
-            [:note {:pitch (parse-pitch raw-pitch)
-                    :pitch-name (pitch-name raw-pitch)
-                    :duration @default-duration}]
-            args)))
+    (doall (reduce (fn [note-so-far arg]
+                     (match arg
+                            [:Pitch       _]      note-so-far ;; already taken care of by the seed
+                            [:Octave-Down _]      (update-in note-so-far [1 :pitch] #(- % note/octave))
+                            [:Octave-Up   _]      (update-in note-so-far [1 :pitch] #(+ % note/octave))
+                            [:Flat]               (do (swap! current-key assoc-in [:accidentals (:pitch-name (second note-so-far))] -1)
+                                                      (note/flatten note-so-far))
+                            [:Natural]            (do (swap! current-key assoc-in [:accidentals (:pitch-name (second note-so-far))] 0)
+                                                      (note/naturalize note-so-far))
+                            [:Sharp]              (do (swap! current-key assoc-in [:accidentals (:pitch-name (second note-so-far))] 1)
+                                                      (note/sharpen note-so-far))
+                            [:Duration length]    (assoc-in note-so-far [1 :duration] (* @default-duration (Long/parseLong length)))))
+                   [:note {:pitch      (parse-pitch raw-pitch)
+                           :pitch-name (pitch-name raw-pitch)
+                           :duration   @default-duration}]
+                   args))))
+
 
 (defn barline
   [type-of-barline]
