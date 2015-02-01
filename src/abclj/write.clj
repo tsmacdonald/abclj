@@ -35,6 +35,16 @@
         2 "^^"}
        accidental ""))
 
+(defn pitch-with-octave
+  [name pitch]
+  (let [[case-fn octave-modifier] (if (>= pitch 12)
+                                    [str/lower-case "'"]
+                                    [str/upper-case ","])]
+    (apply str (case-fn name) (if (<= 0 pitch 23)
+                                [""]
+                                (repeat (Math/abs (int (/ pitch 12)))
+                                        octave-modifier)))))
+
 (defmethod ->abc :note
   [[_ {:keys [pitch pitch-name duration]} :as note]]
   (let [accidental (note/pitch-adjustment note)]
@@ -43,12 +53,10 @@
             (get (merge (:key @current-key) (:accidentals @current-key))
                  pitch-name))
        ""
-       (do (prn @current-key)
-           (swap! current-key assoc-in [:accidentals pitch-name] accidental)
-           (prn @current-key)
-           (println "---------------------------------------------------")
-           (accidental->abc accidental)))
-     pitch-name
+       (do
+         (swap! current-key assoc-in [:accidentals pitch-name] accidental)
+         (accidental->abc accidental)))
+     (pitch-with-octave pitch-name pitch)
      (if (= duration @default-duration) "" (/ duration @default-duration))))) ;;FIXME
 
 (defmethod ->abc :beam-break
@@ -61,7 +69,3 @@
   (if (= type "|")
     " | "
     type))
-
-
-
-;(defn tune->abc)
