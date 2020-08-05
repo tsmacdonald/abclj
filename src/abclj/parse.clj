@@ -1,5 +1,6 @@
 (ns abclj.parse
   (:require [clojure.core.match :refer [match]]
+            [clojure.math.numeric-tower :as math]
             [abclj.note :as note]))
 
 
@@ -65,6 +66,17 @@
      (reset! default-duration duration)
      [:L duration])))
 
+(defn- duration
+  [numerator denominator]
+  (/ (* @default-duration numerator)
+     denominator))
+
+(defn- parse-single-duration
+  [duration]
+  (if (re-matches #"/+" duration)
+    [1 (math/expt 2 (count duration))]
+    [(Long/parseLong duration) 1]))
+
 (defn note
   [& args]
   (let [raw-pitch (->> args
@@ -82,7 +94,8 @@
                                                       (note/naturalize note-so-far))
                             [:Sharp]              (do (swap! current-key assoc-in [:accidentals (:pitch-name (second note-so-far))] 1)
                                                       (note/sharpen note-so-far))
-                            [:Duration length]    (assoc-in note-so-far [1 :duration] (* @default-duration (Long/parseLong length)))))
+                            [:Duration numerator "/" denominator] (assoc-in note-so-far [1 :duration] (duration (Long/parseLong numerator) (Long/parseLong denominator)))
+                            [:Duration length]    (assoc-in note-so-far [1 :duration] (apply duration (parse-single-duration length)))))
                    [:note {:pitch      (parse-pitch raw-pitch)
                            :pitch-name (pitch-name raw-pitch)
                            :duration   @default-duration}]
